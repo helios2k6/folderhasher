@@ -1,0 +1,16 @@
+﻿namespace Serialization;
+
+table FileHashSerialized
+{
+    filePath:string;
+    fileSize:ulong;
+    sha2512Hash:[byte];
+    fileSample:[byte];
+}
+
+table FileHashDatabaseSerialized
+{
+    fileHashes:[FileHash];
+}
+
+root_type FileHashDatabaseSerialized;
