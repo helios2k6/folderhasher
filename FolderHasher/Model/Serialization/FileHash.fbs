@@ -10,7 +10,7 @@ table FileHashSerialized
 
 table FileHashDatabaseSerialized
 {
-    fileHashes:[FileHash];
+    fileHashes:[FileHashSerialized];
 }
 
 root_type FileHashDatabaseSerialized;
