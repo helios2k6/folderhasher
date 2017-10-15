@@ -19,7 +19,11 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+using FlatBuffers;
+using FolderHasher.Model.Serialization;
+using FolderHasher.Utils;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace FolderHasher.Model
@@ -43,7 +47,7 @@ namespace FolderHasher.Model
         /// <summary>
         /// The size of the file
         /// </summary>
-        public long FileSize { get; set; }
+        public ulong FileSize { get; set; }
 
         /// <summary>
         /// the SHA2-512 hash code
@@ -90,9 +94,56 @@ namespace FolderHasher.Model
                 FileSample.Aggregate(0, (acc, e) => acc ^ e.GetHashCode()) ^
                 SHA2512Hash.Aggregate(0, (acc, e) => acc ^ e.GetHashCode());
         }
+
+        /// <summary>
+        /// Serialize a single FileHash object within the context of a provided FlatBufferBuilder. This
+        /// is useful when serializing an array of flat buffers
+        /// </summary>
+        /// <param name="builder">The FlatBufferBuilder</param>
+        /// <returns>An offset representing this FileHash</returns>
+        public Offset<FileHashSerialized> SerializeWithBuilder(FlatBufferBuilder builder)
+        {
+            return SerializeFingerprint(builder);
+        }
+
+        /// <summary>
+        /// Convert a serialized form of this object into an actual object
+        /// </summary>
+        /// <param name="fileHashSerialized"></param>
+        /// <returns></returns>
+        public static FileHash Convert(FileHashSerialized? fileHashSerialized)
+        {
+            FileHashSerialized nonNullRef = TypeUtils.NullThrows(fileHashSerialized);
+            IEnumerable<byte> fileSample = from i in Enumerable.Range(0, nonNullRef.FileSampleLength)
+                                           select nonNullRef.FileSample(i);
+
+            IEnumerable<byte> sha2512 = from i in Enumerable.Range(0, nonNullRef.Sha2512HashLength)
+                                        select nonNullRef.Sha2512Hash(i);
+            return new FileHash
+            {
+                FilePath = nonNullRef.FilePath,
+                FileSize = nonNullRef.FileSize,
+                FileSample = fileSample.ToArray(),
+                SHA2512Hash = sha2512.ToArray(),
+            };
+        }
         #endregion
 
         #region private methods
+        private Offset<FileHashSerialized> SerializeFingerprint(FlatBufferBuilder builder)
+        {
+            StringOffset filePathOffset = builder.CreateString(FilePath);
+            VectorOffset fileSampleOffset = FileHashSerialized.CreateFileSampleVector(builder, FileSample);
+            VectorOffset sha2512Offset = FileHashSerialized.CreateSha2512HashVector(builder, SHA2512Hash);
+
+            FileHashSerialized.StartFileHashSerialized(builder);
+            FileHashSerialized.AddFileSize(builder, FileSize);
+            FileHashSerialized.AddFilePath(builder, filePathOffset);
+            FileHashSerialized.AddFileSample(builder, fileSampleOffset);
+            FileHashSerialized.AddSha2512Hash(builder, sha2512Offset);
+            return FileHashSerialized.EndFileHashSerialized(builder);
+        }
+
         private bool EqualsPreamble(object other)
         {
             if (ReferenceEquals(null, other)) return false;

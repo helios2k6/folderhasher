@@ -1,11 +1,11 @@
-﻿namespace Serialization;
+﻿namespace FolderHasher.Model.Serialization;
 
 table FileHashSerialized
 {
     filePath:string;
     fileSize:ulong;
-    sha2512Hash:[byte];
-    fileSample:[byte];
+    sha2512Hash:[ubyte];
+    fileSample:[ubyte];
 }
 
 table FileHashDatabaseSerialized

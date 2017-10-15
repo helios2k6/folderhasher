@@ -50,7 +50,7 @@ namespace FolderHasher.Hasher
             return new FileHash
             {
                 FileSample = GetFileSample(filePath),
-                FileSize = new FileInfo(filePath).Length,
+                FileSize = (ulong)new FileInfo(filePath).Length,
                 FilePath = filePath,
                 SHA2512Hash = GetSHA512Hash(filePath),
             };
