@@ -51,7 +51,7 @@ namespace FolderHasher.Hasher
             {
                 FileSample = GetFileSample(filePath),
                 FileSize = new FileInfo(filePath).Length,
-                Path = filePath,
+                FilePath = filePath,
                 SHA2512Hash = GetSHA512Hash(filePath),
             };
         }

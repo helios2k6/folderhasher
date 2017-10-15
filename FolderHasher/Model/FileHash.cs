@@ -52,6 +52,9 @@ namespace FolderHasher.Model
         #endregion
 
         #region ctor
+        /// <summary>
+        /// Constructs a new FileHash object
+        /// </summary>
         public FileHash()
         {
             FilePath = string.Empty;
@@ -80,7 +83,6 @@ namespace FolderHasher.Model
             return Equals(obj as FileHash);
         }
 
-        // override object.GetHashCode
         public override int GetHashCode()
         {
             return FilePath.GetHashCode() ^
